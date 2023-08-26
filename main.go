@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-// test
 type Server struct {
 	name      string
 	ipAddress string
