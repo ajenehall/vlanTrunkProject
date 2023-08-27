@@ -9,16 +9,19 @@ import (
 	"strings"
 )
 
+// Server is a data structure for NetScaler server data.
 type Server struct {
 	name      string
 	ipAddress string
 }
 
+// Snip is a data structure for NetScaler IP data.
 type Snip struct {
 	ipAddress  string
 	subnetMask string
 }
 
+// GetFile is a function that gets access to a file based on the file name.
 func GetFile(fileName string) (string, error) {
 	file, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -27,6 +30,8 @@ func GetFile(fileName string) (string, error) {
 	return string(file), nil
 }
 
+// GetConfig is a function that takes the contents of a file as a parameter as well as
+// a pattern to use as a filter to return results as strings.
 func GetConfig(file, pattern string) ([]string, error) {
 	regexer, err := regexp.Compile(pattern)
 	if err != nil {
@@ -36,11 +41,13 @@ func GetConfig(file, pattern string) ([]string, error) {
 	return results, nil
 }
 
+// RemoveConfigKeywords is a function that removes the CLI keywords from within a NetScaler configuration.
 func RemoveConfigKeywords(textLine, pattern string) string {
 	result := strings.Replace(textLine, pattern, "", 1)
 	return result
 }
 
+// GetServers is a function that accepts a file name as a parameter for input and then returns an array of servers.
 func GetServers(fileName string) ([]Server, error) {
 	var servers []Server
 	file, err := GetFile(fileName)
@@ -62,6 +69,7 @@ func GetServers(fileName string) ([]Server, error) {
 	return servers, nil
 }
 
+// GetSnips is a function that accepts a file name as a parameter for input and then returns an array of SNIPs.
 func GetSnips(fileName string) ([]Snip, error) {
 	var snips []Snip
 	file, err := GetFile(fileName)
@@ -83,12 +91,15 @@ func GetSnips(fileName string) ([]Snip, error) {
 	return snips, nil
 }
 
+// ConvertMask is a function that converts subnet masks from decimal notation to CIDR notation.
 func ConvertMask(mask string) string {
 	maskMap := SubnetMaskMap()
 	decimalMask := maskMap[mask]
 	return "/" + decimalMask
 }
 
+// GetNetworks is a function that accepts an array of SNIPs as a parameter for input and then returns an array
+// of networks based off of the SNIPs.
 func GetNetworks(snips []Snip) ([]*net.IPNet, error) {
 	var networks []*net.IPNet
 	for _, snip := range snips {
@@ -101,6 +112,8 @@ func GetNetworks(snips []Snip) ([]*net.IPNet, error) {
 	return networks, nil
 }
 
+// SubnetMaskMap is a function that returns a map of subnet masks that map decimal notation to their
+// equivalent CIDR notation.
 func SubnetMaskMap() map[string]string {
 	subnetMap := make(map[string]string)
 	subnetMap["255.0.0.0"] = "8"
@@ -131,6 +144,7 @@ func SubnetMaskMap() map[string]string {
 	return subnetMap
 }
 
+// CreateFile is a fucntion that accepts a file name as a parameter and returns a pointer to a file.
 func CreateFile(fileName string) (*os.File, error) {
 	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -139,6 +153,7 @@ func CreateFile(fileName string) (*os.File, error) {
 	return file, nil
 }
 
+// Main contains the business logic of the application.
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println(os.Stderr, "Usage: %s filename\n", os.Args[0])
