@@ -131,6 +131,14 @@ func SubnetMaskMap() map[string]string {
 	return subnetMap
 }
 
+func CreateFile(fileName string) (*os.File, error) {
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	return file, nil
+}
+
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println(os.Stderr, "Usage: %s filename\n", os.Args[0])
@@ -164,7 +172,12 @@ func main() {
 	}
 	for _, server := range servers {
 		if serverMap[server.ipAddress] != server.ipAddress {
-			fmt.Println(server.ipAddress)
+			//fmt.Println(server.ipAddress)
+			file, err := CreateFile(os.Args[1] + "-server-output.txt")
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Fprintln(file, server.ipAddress)
 		}
 	}
 }
